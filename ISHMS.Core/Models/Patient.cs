@@ -1,5 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using ISHMS.Core.Constants.Enums;
+using ISHMS.Core.Enums;
 
 namespace ISHMS.Core.Models;
 
@@ -8,20 +8,19 @@ public class Patient
     [Key]
     public int Id { get; set; }
 
-    [Required(ErrorMessage = "Full name is required")]
-    [StringLength(100)]
+    [Required]
+    [MaxLength(100)]
     public string FullName { get; set; }
 
-    [Range(0, 120)]
     public int Age { get; set; }
 
-    [Required]
     public DateTime DateOfBirth { get; set; }
 
-    [Required]
-    public PatientStatus CurrentStatus { get; set; } = PatientStatus.Stable;
+    public PatientStatus CurrentStatus { get; set; }
 
-    public DateTime AdmittedAt { get; set; } = DateTime.UtcNow;
+    public PriorityLevel Priority { get; set; }
 
+    public int NewsScore { get; set; }
     public ICollection<VitalSign>? VitalSigns { get; set; }
+    public DateTime AdmittedAt { get; set; }
 }

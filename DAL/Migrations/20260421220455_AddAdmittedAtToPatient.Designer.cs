@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ISHMS.DAL.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260421220455_AddAdmittedAtToPatient")]
+    partial class AddAdmittedAtToPatient
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -93,32 +96,6 @@ namespace ISHMS.DAL.Migrations
                     b.ToTable("AspNetUsers", (string)null);
                 });
 
-            modelBuilder.Entity("ISHMS.Core.Models.Bed", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<bool>("IsOccupied")
-                        .HasColumnType("bit");
-
-                    b.Property<int?>("PatientId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("RoomId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("PatientId");
-
-                    b.HasIndex("RoomId");
-
-                    b.ToTable("Beds");
-                });
-
             modelBuilder.Entity("ISHMS.Core.Models.Patient", b =>
                 {
                     b.Property<int>("Id")
@@ -144,37 +121,9 @@ namespace ISHMS.DAL.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
-                    b.Property<int>("NewsScore")
-                        .HasColumnType("int");
-
-                    b.Property<int>("Priority")
-                        .HasColumnType("int");
-
                     b.HasKey("Id");
 
                     b.ToTable("Patients");
-                });
-
-            modelBuilder.Entity("ISHMS.Core.Models.Room", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("RoomNumber")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("WardId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("WardId");
-
-                    b.ToTable("Rooms");
                 });
 
             modelBuilder.Entity("ISHMS.Core.Models.VitalSign", b =>
@@ -214,47 +163,6 @@ namespace ISHMS.DAL.Migrations
                     b.HasIndex("PatientId");
 
                     b.ToTable("VitalSigns");
-                });
-
-            modelBuilder.Entity("ISHMS.Core.Models.WaitingPatient", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("AddedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("PatientId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("Priority")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("PatientId");
-
-                    b.ToTable("WaitingPatients");
-                });
-
-            modelBuilder.Entity("ISHMS.Core.Models.Ward", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Wards");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -390,49 +298,10 @@ namespace ISHMS.DAL.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
-            modelBuilder.Entity("ISHMS.Core.Models.Bed", b =>
-                {
-                    b.HasOne("ISHMS.Core.Models.Patient", "Patient")
-                        .WithMany()
-                        .HasForeignKey("PatientId");
-
-                    b.HasOne("ISHMS.Core.Models.Room", "Room")
-                        .WithMany("Beds")
-                        .HasForeignKey("RoomId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Patient");
-
-                    b.Navigation("Room");
-                });
-
-            modelBuilder.Entity("ISHMS.Core.Models.Room", b =>
-                {
-                    b.HasOne("ISHMS.Core.Models.Ward", "Ward")
-                        .WithMany("Rooms")
-                        .HasForeignKey("WardId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Ward");
-                });
-
             modelBuilder.Entity("ISHMS.Core.Models.VitalSign", b =>
                 {
                     b.HasOne("ISHMS.Core.Models.Patient", "Patient")
                         .WithMany("VitalSigns")
-                        .HasForeignKey("PatientId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Patient");
-                });
-
-            modelBuilder.Entity("ISHMS.Core.Models.WaitingPatient", b =>
-                {
-                    b.HasOne("ISHMS.Core.Models.Patient", "Patient")
-                        .WithMany()
                         .HasForeignKey("PatientId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -494,16 +363,6 @@ namespace ISHMS.DAL.Migrations
             modelBuilder.Entity("ISHMS.Core.Models.Patient", b =>
                 {
                     b.Navigation("VitalSigns");
-                });
-
-            modelBuilder.Entity("ISHMS.Core.Models.Room", b =>
-                {
-                    b.Navigation("Beds");
-                });
-
-            modelBuilder.Entity("ISHMS.Core.Models.Ward", b =>
-                {
-                    b.Navigation("Rooms");
                 });
 #pragma warning restore 612, 618
         }

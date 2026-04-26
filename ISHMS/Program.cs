@@ -3,9 +3,8 @@ using System;
 using BLL.Services;
 using Core.Interfaces;
 using DAL.Repositories;
-using ISHMS.BLL.Services;
 using ISHMS.Core.Interfaces;
-using ISHMS.DAL.DbContext;
+using ISHMS.DAL;
 using ISHMS.DAL.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Core.Settings;
@@ -15,8 +14,9 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Text;
+using ISHMS.BLL.Services;
 
-            var builder = WebApplication.CreateBuilder(args);
+var builder = WebApplication.CreateBuilder(args);
 
             // Add services
             builder.Services.AddControllers();
@@ -137,12 +137,17 @@ using System.Text;
             // Dependency Injection
             builder.Services.AddScoped<IPatientRepository, PatientRepository>();
             builder.Services.AddScoped<IPatientService, PatientService>();
-
             builder.Services.AddScoped<IAuthRepository, AuthRepository>();
             builder.Services.AddScoped<IAuthService, AuthService>();
+             builder.Services.AddScoped<NewsService>();
+//ward, room, bed
+           builder.Services.AddScoped<WardService>();
+            builder.Services.AddScoped<RoomService>();
+            builder.Services.AddScoped<BedService>();
 
 
-            var app = builder.Build();
+var app = builder.Build();
+
 
   
 
