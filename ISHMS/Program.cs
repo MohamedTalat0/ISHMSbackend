@@ -1,20 +1,21 @@
 
-using System;
 using BLL.Services;
 using Core.Interfaces;
+using Core.Settings;
 using DAL.Repositories;
+using ISHMS.API.Seeding;
+using ISHMS.BLL.Services;
 using ISHMS.Core.Interfaces;
+using ISHMS.Core.Models;
 using ISHMS.DAL;
 using ISHMS.DAL.Repositories;
-using Microsoft.EntityFrameworkCore;
-using Core.Settings;
-using ISHMS.Core.Models;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using System;
 using System.Text;
-using ISHMS.BLL.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -63,8 +64,15 @@ builder.Services.AddSwaggerGen(options =>
 // DbContext
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(
-        builder.Configuration.GetConnectionString("Default")
-    ));
+        builder.Configuration.GetConnectionString("Default"),
+        sqlOptions =>
+        {
+            sqlOptions.EnableRetryOnFailure(
+                maxRetryCount: 5,
+                maxRetryDelay: TimeSpan.FromSeconds(30),
+                errorNumbersToAdd: null
+            );
+        }));
 
 // ====================================================
 //  ASP.NET Identity
@@ -146,14 +154,22 @@ builder.Services.AddScoped<IDepartmentService, DepartmentService>();
 builder.Services.AddScoped<NewsService>();
 //ward, room, bed
 
+
 //builder.Services.AddScoped<WardService>();
 //builder.Services.AddScoped<RoomService>();
-builder.Services.AddScoped<BedService>();
+//builder.Services.AddScoped<BedService>();
 builder.Services.AddScoped<IPatientTaskService, PatientTaskService>();
 builder.Services.AddScoped<IAlertService, AlertService>();
 builder.Services.AddScoped<IWorkflowService, WorkflowService>();
 builder.Services.AddScoped<IMedicalReportService, MedicalReportService>();
+builder.Services.AddScoped<IAnalyticsService, AnalyticsService>();
+
+
 builder.Services.AddHttpClient<IDrugInteractionService, DrugInteractionService>();
+//seeder
+//builder.Services.AddScoped<HospitalSeeder>();
+//builder.Services.AddTransient<TestPatientSeeder>();
+
 
 
 
@@ -171,11 +187,6 @@ policy =>
 });
 
 var app = builder.Build();
-
-
-
-
-
 
 // Seed Roles first time
 
@@ -241,7 +252,24 @@ using (var scope = app.Services.CreateScope())
         }
     }
 }
+//seed
+//if (app.Environment.IsDevelopment())
+//{
+//    using (var scope = app.Services.CreateScope())
+//    {
+//        var services = scope.ServiceProvider;
 
+//        var seeder = services.GetRequiredService<HospitalSeeder>();
+
+//        await seeder.SeedAsync();
+//    }
+//}
+//if (app.Environment.IsDevelopment())
+//{
+//    using var scope = app.Services.CreateScope();
+//    var seeder = scope.ServiceProvider.GetRequiredService<TestPatientSeeder>();
+//    await seeder.SeedAsync();
+//}
 // Middleware
 //if (app.Environment.IsDevelopment())
 //{

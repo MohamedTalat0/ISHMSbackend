@@ -288,6 +288,9 @@ namespace ISHMS.DAL.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<DateTime>("DueAt")
+                        .HasColumnType("datetime2");
+
                     b.Property<int>("PatientId")
                         .HasColumnType("int");
 
@@ -343,8 +346,8 @@ namespace ISHMS.DAL.Migrations
                     b.Property<int>("HeartRate")
                         .HasColumnType("int");
 
-                    b.Property<int>("OxygenLevel")
-                        .HasColumnType("int");
+                    b.Property<double>("OxygenLevel")
+                        .HasColumnType("float");
 
                     b.Property<int>("PatientId")
                         .HasColumnType("int");

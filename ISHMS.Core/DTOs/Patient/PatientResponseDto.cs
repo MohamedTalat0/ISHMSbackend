@@ -9,6 +9,8 @@ public class PatientResponseDto
     public DateTime AdmittedAt { get; set; }
     public string Status { get; set; }
     public int NewsScore { get; set; }
+    public string? FlowStatus { get; set; }
+
     public string? Background { get; set; }
     public string? PreviousMedications { get; set; }
     public string? CurrentTreatment { get; set; }
