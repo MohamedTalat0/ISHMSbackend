@@ -1,44 +1,29 @@
-﻿using ISHMS.Core.Constants;
-using Microsoft.AspNetCore.Authorization;
+﻿using ISHMS.Core.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
-namespace ISHMS.API.Controllers
+[ApiController]
+[Route("api/[controller]")]
+public class TestController : ControllerBase
 {
-    [Route("api/[controller]")]
-    [ApiController]
-    [Authorize]
-    // [Authorize] على الـ Controller كلها
-    // يعني كل الـ Endpoints محتاجة Token صحيح
-    public class TestController : ControllerBase
+    private readonly IHubService _hubService;
+
+    public TestController(IHubService hubService)
     {
-        [HttpGet("admin-only")]
-        [Authorize(Roles = AppRoles.Admin)]
-        // بس الـ Admin يقدر يوصل
-        public IActionResult AdminOnly()
-        {
-            return Ok(new { Message = "أهلاً Admin!" });
-        }
+        _hubService = hubService;
+    }
 
-        [HttpGet("doctor-only")]
-        [Authorize(Roles = AppRoles.Doctor)]
-        public IActionResult DoctorOnly()
-        {
-            return Ok(new { Message = "أهلاً Doctor!" });
-        }
+    [HttpGet("send-alert")]
+    public async Task<IActionResult> SendAlert()
+    {
+        await _hubService.SendAlertAsync(
+            1,
+            "test",
+            "Doctor",
+            "test",
+            "test",
+            "test"
+        );
 
-        [HttpGet("nurse-only")]
-        [Authorize(Roles = AppRoles.Nurse)]
-        public IActionResult NurseOnly()
-        {
-            return Ok(new { Message = "أهلاً Nurse!" });
-        }
-
-        [HttpGet("multi-roles")]
-        [Authorize(Roles = $"{AppRoles.Admin},{AppRoles.Doctor}")]
-        // Admin أو Doctor يقدر يوصل
-        public IActionResult AdminOrDoctor()
-        {
-            return Ok(new { Message = "أهلاً Admin أو Doctor!" });
-        }
+        return Ok();
     }
 }

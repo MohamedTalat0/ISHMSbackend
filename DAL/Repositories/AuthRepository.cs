@@ -89,17 +89,17 @@ namespace DAL.Repositories
                     Message = "Email Doesn't Exist"
                 };
             }
+            //ldap making it
+            //var isPasswordCorrect = await _userManager.CheckPasswordAsync(user, dto.Password);
 
-            var isPasswordCorrect = await _userManager.CheckPasswordAsync(user, dto.Password);
-
-            if (!isPasswordCorrect)
-            {
-                return new AuthResponseDto
-                {
-                    IsAuthenticated = false,
-                    Message = "Password is incorrect"
-                };
-            }
+            //if (!isPasswordCorrect)
+            //{
+            //    return new AuthResponseDto
+            //    {
+            //        IsAuthenticated = false,
+            //        Message = "Password is incorrect"
+            //    };
+            //}
 
             var roles = await _userManager.GetRolesAsync(user);
 

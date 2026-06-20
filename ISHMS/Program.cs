@@ -1,9 +1,12 @@
 
+using System;
+using System.Text;
 using BLL.Services;
 using Core.Interfaces;
 using Core.Settings;
 using DAL.Repositories;
-using ISHMS.API.Seeding;
+using ISHMS.API.Hubs;
+using ISHMS.API.Realtime;
 using ISHMS.BLL.Services;
 using ISHMS.Core.Interfaces;
 using ISHMS.Core.Models;
@@ -14,8 +17,6 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-using System;
-using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -138,6 +139,23 @@ builder.Services
             IssuerSigningKey = new SymmetricSecurityKey(
                 Encoding.UTF8.GetBytes(jwtSettings.Key))
         };
+        options.Events = new JwtBearerEvents
+        {
+            OnMessageReceived = context =>
+            {
+                var accessToken = context.Request.Query["access_token"];
+                var path = context.HttpContext.Request.Path;
+
+                if (!string.IsNullOrEmpty(accessToken) &&
+                    path.StartsWithSegments("/hubs"))
+                {
+                    context.Token = accessToken;
+                }
+
+                return Task.CompletedTask;
+            }
+        };
+
     });
 
 
@@ -164,10 +182,14 @@ builder.Services.AddScoped<IWorkflowService, WorkflowService>();
 builder.Services.AddScoped<IMedicalReportService, MedicalReportService>();
 builder.Services.AddScoped<IAnalyticsService, AnalyticsService>();
 
+builder.Services.AddScoped<ILdapAuthenticationService,LdapAuthenticationService>();
 
 builder.Services.AddHttpClient<IDrugInteractionService, DrugInteractionService>();
+
+builder.Services.AddScoped<IHubService, HubService>();
+builder.Services.AddSignalR();
 //seeder
-//builder.Services.AddScoped<HospitalSeeder>();
+builder.Services.AddScoped<HospitalSeeder>();
 //builder.Services.AddTransient<TestPatientSeeder>();
 
 
@@ -177,13 +199,18 @@ builder.Services.AddHttpClient<IDrugInteractionService, DrugInteractionService>(
 
 builder.Services.AddCors(options =>
 {
-options.AddPolicy("AllowAll",
-policy =>
-{
-    policy.AllowAnyOrigin()
-          .AllowAnyHeader()
-          .AllowAnyMethod();
-});
+    options.AddPolicy("AllowAll",
+    policy =>
+    {
+        policy.WithOrigins(
+            "https://ishms-sigma.vercel.app",
+            "http://localhost:3000",
+            "http://localhost:5173"
+              )
+              .AllowAnyHeader()
+              .AllowAnyMethod()
+              .AllowCredentials();
+    });
 });
 
 var app = builder.Build();
@@ -253,23 +280,18 @@ using (var scope = app.Services.CreateScope())
     }
 }
 //seed
-//if (app.Environment.IsDevelopment())
-//{
-//    using (var scope = app.Services.CreateScope())
-//    {
-//        var services = scope.ServiceProvider;
+if (app.Environment.IsDevelopment())
+{
+    using (var scope = app.Services.CreateScope())
+    {
+        var services = scope.ServiceProvider;
 
-//        var seeder = services.GetRequiredService<HospitalSeeder>();
+        var seeder = services.GetRequiredService<HospitalSeeder>();
 
-//        await seeder.SeedAsync();
-//    }
-//}
-//if (app.Environment.IsDevelopment())
-//{
-//    using var scope = app.Services.CreateScope();
-//    var seeder = scope.ServiceProvider.GetRequiredService<TestPatientSeeder>();
-//    await seeder.SeedAsync();
-//}
+        await seeder.SeedAsync();
+    }
+}
+
 // Middleware
 //if (app.Environment.IsDevelopment())
 //{
@@ -285,7 +307,7 @@ app.UseHttpsRedirection();
 app.UseAuthentication();
 
 app.UseAuthorization();
-
+app.MapHub<NotificationHub>("/hubs/notifications");
 app.MapControllers();
 
 app.Run();

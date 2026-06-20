@@ -1,5 +1,7 @@
 ﻿using Core.DTOs.Auth;
 using Core.Interfaces;
+using ISHMS.BLL.Services;
+using ISHMS.Core.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ISHMS.API.Controllers
@@ -12,12 +14,25 @@ namespace ISHMS.API.Controllers
     public class AuthController : ControllerBase
     {
         private readonly IAuthService _authService;
-
-        public AuthController(IAuthService authService)
+        private readonly ILdapAuthenticationService _ldapService;
+        public AuthController(IAuthService authService, ILdapAuthenticationService ldapAuthenticationService)
         {
             _authService = authService;
+            _ldapService = ldapAuthenticationService;
         }
 
+
+        //[HttpPost("test-ldap")]
+        //public IActionResult TestLdap(LoginDto dto)
+        //{
+        //    var result = _ldapAuthenticationService
+        //        .Authenticate(dto.username, dto.Password);
+
+        //    return Ok(new
+        //    {
+        //        ldapResult = result
+        //    });
+        //}
         // ==================== Register ====================
 
         [HttpPost("register")]
@@ -58,6 +73,17 @@ namespace ISHMS.API.Controllers
             }
 
             return Ok(result);
+        }
+
+        [HttpGet("test-user/{username}")]
+        public IActionResult TestUser(string username)
+        {
+            var user = _ldapService.GetUserInfo(username);
+
+            if (user == null)
+                return NotFound();
+
+            return Ok(user);
         }
     }
 }

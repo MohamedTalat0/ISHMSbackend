@@ -7,7 +7,6 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace ISHMS.API.Controllers
 {
-    //[Authorize(Roles = "Admin")]
     [Route("api/[controller]")]
     [ApiController]
     public class AnalyticsController : ControllerBase
